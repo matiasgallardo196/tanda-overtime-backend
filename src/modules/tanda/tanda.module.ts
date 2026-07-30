@@ -7,5 +7,6 @@ import { TandaService } from './tanda.service';
   imports: [HttpModule],
   controllers: [TandaController],
   providers: [TandaService],
+  exports: [TandaService],
 })
 export class TandaModule {}

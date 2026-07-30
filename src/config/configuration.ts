@@ -23,6 +23,16 @@ export interface AppConfig {
      */
     overtimePaidContractIds: number[];
   };
+  resend: {
+    apiKey: string | undefined;
+    fromEmail: string | undefined;
+  };
+  twilio: {
+    accountSid: string | undefined;
+    authToken: string | undefined;
+    whatsappFrom: string | undefined;
+    smsFrom: string | undefined;
+  };
 }
 
 export default (): AppConfig => ({
@@ -42,5 +52,15 @@ export default (): AppConfig => ({
       .map((s) => s.trim())
       .filter(Boolean)
       .map((s) => parseInt(s, 10)),
+  },
+  resend: {
+    apiKey: process.env.RESEND_API_KEY,
+    fromEmail: process.env.REPORT_FROM_EMAIL,
+  },
+  twilio: {
+    accountSid: process.env.TWILIO_ACCOUNT_SID,
+    authToken: process.env.TWILIO_AUTH_TOKEN,
+    whatsappFrom: process.env.TWILIO_WHATSAPP_FROM,
+    smsFrom: process.env.TWILIO_SMS_FROM,
   },
 });
