@@ -44,15 +44,16 @@ export class AlertsSchedulerService {
   /** Builds the report and sends it to every channel configured for the alert's recipient. */
   async dispatch(alert: Alert): Promise<void> {
     const report = await this.reportBuilder.build(alert);
-    const combinedMessage = `${report.subject}\n\n${report.text}`;
+    const fullMessage = `${report.subject}\n\n${report.text}`;
 
     for (const channel of alert.recipient.channels) {
       if (channel.type === 'email') {
         await this.emailSender.send(channel.destination, report.subject, report.html, report.text);
       } else if (channel.type === 'whatsapp') {
-        await this.twilioSender.sendWhatsapp(channel.destination, combinedMessage);
+        // WhatsApp has no per-segment restriction like SMS trial accounts do, full detail is fine.
+        await this.twilioSender.sendWhatsapp(channel.destination, fullMessage);
       } else if (channel.type === 'sms') {
-        await this.twilioSender.sendSms(channel.destination, combinedMessage);
+        await this.twilioSender.sendSms(channel.destination, report.sms);
       }
     }
   }

@@ -7,12 +7,19 @@ export interface ReportContent {
   subject: string;
   html: string;
   text: string;
+  /**
+   * Short one-liner summary for SMS. Trial Twilio accounts reject
+   * multi-segment SMS (error 30044), and SMS is meant for a quick heads-up
+   * anyway - the full detail already goes out via email/WhatsApp.
+   */
+  sms: string;
 }
 
 interface ReportSection {
   title: string;
   html: string;
   text: string;
+  count: number;
 }
 
 @Injectable()
@@ -37,8 +44,9 @@ export class ReportBuilderService {
     const text = sections.map((s) => `${s.title}\n${'-'.repeat(s.title.length)}\n${s.text}`).join(
       '\n\n',
     );
+    const sms = `${alert.name}: ${sections.map((s) => `${s.count} - ${s.title}`).join('; ')}`;
 
-    return { subject, html, text };
+    return { subject, html, text, sms };
   }
 
   private async getDepartmentMembership(): Promise<Map<number, Set<number>>> {
@@ -90,7 +98,7 @@ export class ReportBuilderService {
 
     if (overLimit.length === 0) {
       const msg = 'No employees are currently projected over the limit.';
-      return { title, html: `<p>${msg}</p>`, text: msg };
+      return { title, html: `<p>${msg}</p>`, text: msg, count: 0 };
     }
 
     const text = overLimit
@@ -109,7 +117,7 @@ export class ReportBuilderService {
         .join('') +
       '</ul>';
 
-    return { title, html, text };
+    return { title, html, text, count: overLimit.length };
   }
 
   private async buildClockComplianceSection(alert: Alert): Promise<ReportSection> {
@@ -131,7 +139,7 @@ export class ReportBuilderService {
 
     if (flagged.length === 0) {
       const msg = 'No clock-in/out issues yesterday.';
-      return { title, html: `<p>${msg}</p>`, text: msg };
+      return { title, html: `<p>${msg}</p>`, text: msg, count: 0 };
     }
 
     const describe = (e: (typeof flagged)[number]) => {
@@ -146,7 +154,7 @@ export class ReportBuilderService {
     const text = flagged.map((e) => `- ${describe(e)}`).join('\n');
     const html = '<ul>' + flagged.map((e) => `<li>${escapeHtml(describe(e))}</li>`).join('') + '</ul>';
 
-    return { title, html, text };
+    return { title, html, text, count: flagged.length };
   }
 }
 
