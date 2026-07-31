@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import configuration from './config/configuration';
 import { TandaModule } from './modules/tanda/tanda.module';
 import { AlertsModule } from './modules/alerts/alerts.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -11,9 +14,14 @@ import { AlertsModule } from './modules/alerts/alerts.module';
       isGlobal: true,
       load: [configuration],
     }),
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60_000, limit: 120 }], // generous global default; auth/login has its own stricter limit
+    }),
     ScheduleModule.forRoot(),
+    AuthModule,
     TandaModule,
     AlertsModule,
   ],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

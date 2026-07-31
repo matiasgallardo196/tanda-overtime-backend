@@ -33,6 +33,15 @@ export interface AppConfig {
     whatsappFrom: string | undefined;
     smsFrom: string | undefined;
   };
+  auth: {
+    username: string | undefined;
+    /** bcrypt hash - never the plain password, not even in .env. */
+    passwordHash: string | undefined;
+    jwtSecret: string | undefined;
+    jwtExpiresIn: string;
+    /** Cookie Domain attribute, e.g. ".yourdomain.com" to share the session cookie across subdomains. Empty = host-only cookie (fine for local dev). */
+    cookieDomain: string | undefined;
+  };
 }
 
 export default (): AppConfig => ({
@@ -62,5 +71,12 @@ export default (): AppConfig => ({
     authToken: process.env.TWILIO_AUTH_TOKEN,
     whatsappFrom: process.env.TWILIO_WHATSAPP_FROM,
     smsFrom: process.env.TWILIO_SMS_FROM,
+  },
+  auth: {
+    username: process.env.AUTH_USERNAME,
+    passwordHash: process.env.AUTH_PASSWORD_HASH,
+    jwtSecret: process.env.JWT_SECRET,
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
+    cookieDomain: process.env.COOKIE_DOMAIN,
   },
 });
