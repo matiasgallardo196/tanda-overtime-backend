@@ -6,8 +6,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     volumes:
       # Persists data/alerts.json across redeploys/restarts - without this,
       # every deploy wipes the configured alerts.
