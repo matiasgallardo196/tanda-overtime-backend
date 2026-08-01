@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { TandaModule } from './modules/tanda/tanda.module';
 import { AlertsModule } from './modules/alerts/alerts.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CostsModule } from './modules/costs/costs.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AuthModule } from './modules/auth/auth.module';
     AuthModule,
     TandaModule,
     AlertsModule,
+    CostsModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

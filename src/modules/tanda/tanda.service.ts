@@ -139,6 +139,32 @@ export class TandaService {
   }
 
   /**
+   * Worked shifts including their wage cost (no on-costs). Requires the
+   * token to have the "cost" OAuth scope, otherwise Tanda omits the field.
+   */
+  async getShiftsWithCosts(
+    from: string,
+    to: string,
+    orgId?: number,
+  ): Promise<TandaShift[]> {
+    return this.get<TandaShift[]>(
+      `/api/v2/shifts?from=${from}&to=${to}&show_costs=true`,
+      orgId,
+    );
+  }
+
+  /** Roster containing the given date, with wage cost per schedule entry. */
+  async getRosterOnWithCosts(
+    date: string,
+    orgId?: number,
+  ): Promise<TandaRoster> {
+    return this.get<TandaRoster>(
+      `/api/v2/rosters/on/${date}?show_costs=true`,
+      orgId,
+    );
+  }
+
+  /**
    * Sums only UNPAID break minutes (breaks[].paid === false).
    * Paid breaks count as worked time and are not subtracted.
    */

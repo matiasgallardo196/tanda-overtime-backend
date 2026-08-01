@@ -17,6 +17,8 @@ export interface TandaShift {
   breaks: TandaBreak[];
   department_id: number;
   status?: string;
+  /** Wage cost (no on-costs). Only present when requested with show_costs=true (requires the "cost" OAuth scope). */
+  cost?: number | null;
   [key: string]: unknown;
 }
 
@@ -29,6 +31,8 @@ export interface TandaRosterSchedule {
   breaks: TandaBreak[];
   automatic_break_length?: number;
   department_id: number;
+  /** Wage cost (no on-costs). Only present when requested with show_costs=true (requires the "cost" OAuth scope). */
+  cost?: number | null;
   [key: string]: unknown;
 }
 
