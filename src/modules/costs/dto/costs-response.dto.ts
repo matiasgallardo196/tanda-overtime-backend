@@ -21,8 +21,18 @@ export class WeeklyCostDto {
   @ApiProperty({ example: 603.6 })
   hours: number;
 
-  @ApiProperty({ example: 24378.52, description: 'Wage cost, no on-costs' })
+  @ApiProperty({
+    example: 22676.6,
+    description:
+      "Wage cost of worked shifts, no on-costs, excluding leave - matches Tanda's \"Timesheet Cost (exc. leave)\"",
+  })
   cost: number;
+
+  @ApiProperty({
+    example: 1701.92,
+    description: 'Cost of approved leave entries (annual/sick) in the week, tracked apart',
+  })
+  leaveCost: number;
 
   @ApiProperty({
     example: true,
@@ -109,11 +119,17 @@ export class CostsSummaryDto {
   @ApiProperty({ example: '2026-08-01' })
   today: string;
 
-  @ApiProperty({ example: 104992.86, description: 'Wage cost (no on-costs) from fyStart to today' })
+  @ApiProperty({
+    example: 104992.86,
+    description: 'Wage cost of worked shifts (no on-costs, excluding leave) from fyStart to today',
+  })
   fyToDateCost: number;
 
   @ApiProperty({ example: 2716.4 })
   fyToDateHours: number;
+
+  @ApiProperty({ example: 3403.84, description: 'Cost of approved leave from fyStart to today' })
+  fyToDateLeaveCost: number;
 
   @ApiProperty({ type: [WeeklyCostDto], description: 'Payroll weeks from the fiscal year start to the current week' })
   weeks: WeeklyCostDto[];
@@ -167,8 +183,14 @@ export class WeekDetailDto {
   @ApiProperty({ example: 603.6, description: 'Actual worked hours (timesheets)' })
   actualHours: number;
 
-  @ApiProperty({ example: 24378.52, description: 'Actual wage cost (timesheets), no on-costs' })
+  @ApiProperty({
+    example: 22676.6,
+    description: 'Actual wage cost of worked shifts (timesheets), no on-costs, excluding leave',
+  })
   actualCost: number;
+
+  @ApiProperty({ example: 1701.92, description: 'Cost of approved leave entries in the week' })
+  leaveCost: number;
 
   @ApiProperty({ example: 599, description: 'Scheduled hours in the roster for this week' })
   rosterHours: number;

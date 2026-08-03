@@ -19,6 +19,8 @@ export interface TandaShift {
   status?: string;
   /** Wage cost (no on-costs). Only present when requested with show_costs=true (requires the "cost" OAuth scope). */
   cost?: number | null;
+  /** Set when the entry is approved leave (annual/sick), not a worked shift. */
+  leave_request_id?: number | null;
   [key: string]: unknown;
 }
 

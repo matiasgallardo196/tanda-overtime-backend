@@ -38,6 +38,8 @@ interface AggregatedShift {
   departmentId: number;
   hours: number;
   cost: number;
+  /** True for leave entries (annual/sick leave) - costed but not worked. */
+  isLeave: boolean;
 }
 
 @Injectable()
@@ -88,6 +90,7 @@ export class CostsService {
     const deptTotals = new Map<string, { hours: number; cost: number }>();
     let fyToDateCost = 0;
     let fyToDateHours = 0;
+    let fyToDateLeaveCost = 0;
     let spentInPeriod = 0;
 
     for (const week of weekStarts) {
@@ -97,6 +100,7 @@ export class CostsService {
       const byDept = new Map<string, { hours: number; cost: number }>();
       let weekHours = 0;
       let weekCost = 0;
+      let weekLeaveCost = 0;
       let partial = false;
 
       for (const row of rows) {
@@ -107,6 +111,15 @@ export class CostsService {
           continue;
         }
         if (row.date > todayStr) continue;
+
+        // Leave is tracked apart so "cost" matches Tanda's
+        // "Timesheet Cost (exc. leave)" and roster comparisons stay
+        // apples-to-apples (rosters never contain leave).
+        if (row.isLeave) {
+          weekLeaveCost += row.cost;
+          fyToDateLeaveCost += row.cost;
+          continue;
+        }
 
         weekHours += row.hours;
         weekCost += row.cost;
@@ -135,6 +148,7 @@ export class CostsService {
         weekEnd: week.endStr,
         hours: round2(weekHours),
         cost: round2(weekCost),
+        leaveCost: round2(weekLeaveCost),
         complete: week.endStr < todayStr,
         partial,
         byDepartment: toDeptList(byDept),
@@ -151,6 +165,7 @@ export class CostsService {
       today: todayStr,
       fyToDateCost: round2(fyToDateCost),
       fyToDateHours: round2(fyToDateHours),
+      fyToDateLeaveCost: round2(fyToDateLeaveCost),
       weeks,
       departmentTotals: toDeptList(deptTotals),
       budget,
@@ -191,8 +206,13 @@ export class CostsService {
     const byDay = new Map<string, { hours: number; cost: number }>();
     let actualHours = 0;
     let actualCost = 0;
+    let leaveCost = 0;
 
     for (const row of rows) {
+      if (row.isLeave) {
+        leaveCost += row.cost;
+        continue;
+      }
       actualHours += row.hours;
       actualCost += row.cost;
 
@@ -255,6 +275,7 @@ export class CostsService {
       weekEnd: week.endStr,
       actualHours: round2(actualHours),
       actualCost: round2(actualCost),
+      leaveCost: round2(leaveCost),
       rosterHours: round2(rosterHours),
       rosterCost: round2(rosterCost),
       actualByDepartment: toDeptList(actualByDept),
@@ -308,6 +329,10 @@ function aggregateShifts(shifts: TandaShift[]): AggregatedShift[] {
       departmentId: s.department_id,
       hours,
       cost: typeof s.cost === 'number' ? s.cost : 0,
+      // Approved leave comes back from /shifts as a costed entry with a
+      // leave_request_id. Kept separate so "cost" matches Tanda's own
+      // "Timesheet Cost (exc. leave)" metric.
+      isLeave: s.leave_request_id != null,
     });
   }
   return rows;
