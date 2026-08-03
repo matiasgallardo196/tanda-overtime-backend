@@ -7,7 +7,11 @@ import {
   TandaUser,
   TandaDepartment,
 } from '../tanda/interfaces/tanda-api.interfaces';
-import { getPayrollWeek, PayrollWeek } from '../tanda/utils/payroll-week.util';
+import {
+  getPayrollWeek,
+  nowInOrgTimezone,
+  PayrollWeek,
+} from '../tanda/utils/payroll-week.util';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
 import {
   BudgetTrackingDto,
@@ -72,7 +76,7 @@ export class CostsService {
   // ---------- summary ----------
 
   async getSummary(orgId?: number): Promise<CostsSummaryDto> {
-    const today = new Date();
+    const today = nowInOrgTimezone();
     const todayStr = toDateStr(today);
     const { fyStart, fyEnd } = fiscalYearFor(today);
     const budget = await this.budgetRepository.find();
@@ -179,7 +183,7 @@ export class CostsService {
     weekStartStr: string | undefined,
     orgId?: number,
   ): Promise<WeekDetailDto> {
-    const reference = weekStartStr ? parseDate(weekStartStr) : new Date();
+    const reference = weekStartStr ? parseDate(weekStartStr) : nowInOrgTimezone();
     const week = getPayrollWeek(reference);
     if (weekStartStr && week.startStr !== weekStartStr) {
       throw new BadRequestException(
@@ -291,7 +295,7 @@ export class CostsService {
     week: PayrollWeek,
     orgId?: number,
   ): Promise<TandaShift[]> {
-    const todayStr = toDateStr(new Date());
+    const todayStr = toDateStr(nowInOrgTimezone());
     const cacheKey = `${orgId ?? 'default'}:${week.startStr}`;
     const ttl = week.endStr < todayStr ? CLOSED_WEEK_TTL_MS : OPEN_WEEK_TTL_MS;
 
